@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PermissionManager.h"
+#include "../permission/PermissionManager.h"
 #include "../group/GroupManager.h"
 #include "../client/ClientManager.h"
 #include "../client/LocalClient.h"

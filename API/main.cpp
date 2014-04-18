@@ -1,6 +1,6 @@
 #include "net/Iterable.h"
 #include "net/client/ClientManager.h"
-#include "net/session/PermissionManager.h"
+#include "net/permission/PermissionManager.h"
 #include "net/session/Session.h"
 #include "net/DistributedScenario.h"
 #include <vector>

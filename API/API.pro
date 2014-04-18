@@ -33,11 +33,14 @@ HEADERS += \
     net/properties/GenerateUniqueProperty.h \
     net/properties/hasId.h \
     net/session/Session.h \
-    net/session/Permission.h \
-    net/session/PermissionManager.h \
+    net/permission/Permission.h \
+    net/permission/PermissionManager.h \
     net/synchronisation_policy/SynchronisationPolicy.h \
     net/client/Client.h \
     net/client/LocalClient.h \
     net/client/RemoteClient.h \
-    net/DereferenceIterator.h
+    net/DereferenceIterator.h \
+    net/session/MasterSession.h \
+    net/session/ClientSession.h \
+    net/session/SessionInformation.h
 
