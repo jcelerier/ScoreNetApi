@@ -1,21 +1,58 @@
 #pragma once
 #include "Client.h"
+#include "RemoteSender.h"
 
-class RemoteClient : public Client
+class RemoteClient : public Client, public RemoteSender
 {
 	using SignalHandler = std::function<void()>;
 
 	public:
-		using Client::Client;
+		RemoteClient(const int id,
+					 const std::string& hostname,
+					 const std::string& remoteip,
+					 const int remoteport,
+					 ClientSignalHandler changeHandler):
+			Client(id, hostname, changeHandler),
+			RemoteSender(remoteip, remoteport)
+		{
+		}
+
+		RemoteClient(const int id,
+					 const std::string& hostname,
+					 OscSender&& sender,
+					 ClientSignalHandler changeHandler):
+			Client(id, hostname, changeHandler),
+			RemoteSender(std::move(sender))
+		{
+		}
+
 		RemoteClient(RemoteClient&&) = default;
 		RemoteClient(const RemoteClient&) = default;
 		RemoteClient& operator=(const RemoteClient&) = default;
 		RemoteClient& operator=(RemoteClient&&) = default;
 
+		/**** Inter-client communication ****/
+		// Cette méthode est appelée par le serveur.
+		// Le serveur dit au client A (this, qui vient d'être créé)
+		// d'initier la connection avec le client B (c).
+		// Pour cela, on a besoin de l'ip de B par rapport au serveur.
+		void initConnectionTo(RemoteClient& c)
+		{
+			if(c.getId() != getId())
+			{
+				send("/connect/discover",
+					 c.getName().c_str(),
+					 c.getId(),
+					 c.ip().c_str(),
+					 c.port());
+			}
+		}
+
+		/**** Delay-related methods ****/
 		void pollDelay();
 		int getDelay();
 
 	private:
-		int delayInMs; // ns ?
-
+		int _delayInMs; // ns ? µs?
 };
+

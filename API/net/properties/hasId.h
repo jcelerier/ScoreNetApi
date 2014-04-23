@@ -1,4 +1,5 @@
 #pragma once
 #include "GenerateUniqueProperty.h"
+#include <climits>
 
-GenerateUniqueProperty(Id, int)
+GenerateUniqueProperty(Id, std::int32_t)

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <memory>
+#include "../osc/oscreceiver.h"
+
 #include "../group/Group.h"
 
 #include"../properties/hasId.h"
@@ -14,15 +16,19 @@ class Client : public hasId, public hasName
 		using hasName::hasSame;
 		using hasId::hasSame;
 
+		Client(const std::string& hostname):
+			hasId(-1),
+			hasName(hostname),
+			changed{}
+		{
+
+		}
+
 		Client(const int id,
 			   const std::string& hostname,
-			   const std::string& ip,
-			   const int port,
 			   ClientSignalHandler changeHandler):
 			hasId(id),
 			hasName(hostname),
-			_ip(ip),
-			_port(port),
 			changed(std::bind(changeHandler, std::ref(*this)))
 		{
 		}
@@ -43,27 +49,8 @@ class Client : public hasId, public hasName
 			return c.getId() == getId();
 		}
 
-		const std::string& ip() const
-		{
-			return _ip;
-		}
-
-		void setIp(std::string ip)
-		{
-			_ip = ip;
-		}
-
-		int port() const
-		{
-			return _port;
-		}
-
 	protected:
-		std::string _ip;
-		int _port;
-
 		SignalHandler changed;
-		std::vector<Group_p> _groups;
 };
 
 using Client_p = std::unique_ptr<Client>;

@@ -2,16 +2,21 @@
 #include "net/client/ClientManager.h"
 #include "net/permission/PermissionManager.h"
 #include "net/session/Session.h"
+#include "net/session/ClientSessionBuilder.h"
+#include "net/session/MasterSession.h"
 #include "net/DistributedScenario.h"
 #include <vector>
 #include <iostream>
+
 using namespace std;
 int main()
 {
-	auto sessionList = SessionInformation::list();
-	auto joinedSession = sessionList[0].join();
+	auto sessionList = ClientSessionBuilder::list("localClt");
+	sessionList[0].join();
 
-	MasterSession s;
+	MasterSession s("Ma Session");
+	std::cerr << s.getId() << std::endl;
+
 	s.createGroup("Mon groupe");
 	s.createGroup("Mon autre groupe");
 

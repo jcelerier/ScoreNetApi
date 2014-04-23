@@ -64,7 +64,7 @@ class Iterable
 		template<typename... K>
 		T& create(K&&... args)
 		{
-			elements().emplace_back(new T(args...));
+			elements().emplace_back(new T(std::forward<K>(args)...));
 			return *elements().back().get();
 		}
 

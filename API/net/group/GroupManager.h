@@ -3,12 +3,13 @@
 #include "Group.h"
 #include "../Iterable.h"
 #include <utility>
+#include <algorithm>
 class GroupManager : public Iterable<Group>
 {
 		using SignalHandler = std::function<void()>;
 
 	private:
-		unsigned int _lastId = 0;
+		int _lastId = 0;
 		Group::GroupSignalHandler groupChanged; //Même handler pour tous les groupes
 		SignalHandler changed;
 
@@ -19,10 +20,22 @@ class GroupManager : public Iterable<Group>
 		{
 		}
 
-		Group& createGroup(std::string&& name)
+		Group& createGroup(std::string name)
 		{
 			performUniquenessCheck(std::forward<std::string>(name));
 			auto& g = create(name, _lastId++, groupChanged);
+
+			changed();
+			return g;
+		}
+
+		Group& createGroup(int id, std::string name)
+		{
+			performUniquenessCheck(id);
+			performUniquenessCheck(std::forward<std::string>(name));
+			auto& g = create(name, id, groupChanged);
+
+			_lastId = std::max(_lastId, id);
 
 			changed();
 			return g;

@@ -1,13 +1,12 @@
 #pragma once
 #include "Session.h"
+#include "../client/LocalClient.h"
+
 class ClientSession : public Session
 {
+		friend class ClientSessionBuilder;
 	public:
-		ClientSession() = default;
-		ClientSession(ClientSession&&) = default;
-		ClientSession(const ClientSession&) = default;
-
-
+		using Session::Session;
 
 		virtual Client& getLocalClient() override
 		{

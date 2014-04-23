@@ -3,10 +3,6 @@
 #include <vector>
 #include"../properties/hasId.h"
 #include"../properties/hasName.h"
-class ClientCountPolicy
-{
-	// déterminé / indéterminé. Par défaut, 1 max.
-};
 
 class DistributedScenario;
 class Group: public hasName, public hasId
@@ -46,8 +42,9 @@ class Group: public hasName, public hasId
 		}
 
 		// Example de fonctionnalité que peut offrir les Groupes ?
-		void mute() { }
-		void unmute() { }
+		void mute() { _isMuted = true; }
+		void unmute() { _isMuted = false; }
+		bool isMuted() { return _isMuted; }
 
 		std::vector<std::reference_wrapper<const DistributedScenario> >& getScenarios()
 		{
@@ -84,8 +81,8 @@ class Group: public hasName, public hasId
 		SignalHandler changed;
 
 	private:
-		ClientCountPolicy cp;
 		std::vector<std::reference_wrapper<const DistributedScenario> > _scenarios;
+		bool _isMuted;
 		// Couleur ?
 };
 

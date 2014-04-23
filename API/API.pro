@@ -5,6 +5,18 @@ CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++1y -stdlib=libc++
 QMAKE_LFLAGS += -lc++
+
+#### Libraries ####
+  ##  Oscpack  ##
+unix:!macx: LIBS += -L$$PWD/../../../../git/oscpack/build/ -loscpack
+
+INCLUDEPATH += $$PWD/../../../../git/oscpack/src
+DEPENDPATH += $$PWD/../../../../git/oscpack/src
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../git/oscpack/build/liboscpack.a
+
+
+#### Source files ####
 SOURCES += main.cpp \
     Scenario.cpp \
     TimeProcess.cpp \
@@ -39,8 +51,13 @@ HEADERS += \
     net/client/Client.h \
     net/client/LocalClient.h \
     net/client/RemoteClient.h \
-    net/DereferenceIterator.h \
+    net/osc/oscsender.h \
+    net/osc/oscreceiver.h \
+    net/osc/oscmessagegenerator.h \
     net/session/MasterSession.h \
     net/session/ClientSession.h \
-    net/session/SessionInformation.h
+    net/session/ClientSessionBuilder.h \
+    net/client/RemoteSender.h \
+    net/client/RemoteMaster.h \
+    net/client/LocalMaster.h
 
