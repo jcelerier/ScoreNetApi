@@ -7,13 +7,25 @@
 class MasterSession : public Session
 {
 	public:
-		using Session::Session;
-
-		void send__session_update_group(RemoteClient& client)
+		template<typename... K>
+		MasterSession(K&&... args):
+			Session(std::forward<K>(args)...),
+			_localMaster(new LocalMaster(9000, 0, "master"))
 		{
+			OscReceiver::connection_handler h = std::bind(&MasterSession::handle__session_connect,
+														  this,
+														  std::placeholders::_1,
+														  std::placeholders::_2);
 
+			_localMaster->receiver().setConnectionHandler("/session/connect", h);
+			_localMaster->receiver().addHandler("/session/permission/update",
+												&MasterSession::handle__session_permission_update,
+												this);
+
+			_localMaster->receiver().run();
 		}
 
+		virtual ~MasterSession() = default;
 
 		void handle__session_connect(osc::ReceivedMessageArgumentStream args, std::string ip)
 		{
@@ -22,7 +34,7 @@ class MasterSession : public Session
 
 			args >> idSession >> cname >> clientListenPort >> osc::EndMessage;
 			std::string clientName(cname);
-			OscSender tempSender(ip, clientListenPort);
+			OscSender clientSender(ip, clientListenPort);
 
 			// Test si bonne session
 			if(idSession != getId()) return;
@@ -33,16 +45,114 @@ class MasterSession : public Session
 							{ return c.getName() == clientName;	}))
 			{
 
-				tempSender.send(osc::MessageGenerator()("/session/clientNameIsTaken",
-														getId(),
-														cname));
+				clientSender.send(osc::MessageGenerator()("/session/clientNameIsTaken",
+														  getId(),
+														  cname));
 				return;
 			}
 
-			createClient(clientName, std::move(tempSender));
+			createClient(clientName, std::move(clientSender));
 		}
 
-		virtual Client& getLocalClient() override
+		// /session/permission/update sessionId clientId groupId category enablement
+		void handle__session_permission_update(osc::ReceivedMessageArgumentStream args)
+		{
+			osc::int32 sessionId, clientId, groupId;
+			osc::int32 cat;
+			bool enablement;
+
+			args >> sessionId >> clientId >> groupId >> cat >> enablement >> osc::EndMessage;
+
+			if(sessionId != getId()) return;
+
+			auto& client = _clients(clientId);
+			auto& group  = _groups(groupId);
+			auto& perm   = _permissions(client,
+										group);
+
+			bool prevListens = perm.listens(),
+				 prevWrites  = perm.writes();
+
+			perm.setPermission(static_cast<Permission::Category>(cat),
+							   static_cast<Permission::Enablement>(enablement));
+
+
+			// Cas de changements :
+			//	- !listens() devient  listens()
+			//		=> ceux qui ont W sur group prennent connaissance de moi.
+			//	-  listens() devient !listens()
+			//		=> ceux qui ont W sur group m'oublient.
+			//  - !writes()  devient  writes()
+			//		=> je prends connaissance de ceux qui ont R / W / X sur groupe.
+			//  -  writes()  devient !writes()
+			//		=> j'oublie tout le monde sur ce groupe.
+			//
+			// Dans tous les cas on informe le maître, c'est lui qui informe les uns et les autres.
+			//
+			// Faire un RemotePermission avec juste listens() et writes()
+			if(!prevListens && perm.listens())
+			{
+				for(RemoteClient& rclt : _clients)
+				{
+					if(_permissions(rclt, group).writes())
+					{
+						rclt.initConnectionTo(client);
+						rclt.send("/session/permission/update",
+								  getId(),
+								  client.getId(),
+								  group.getId(),
+								  cat,
+								  enablement);
+					}
+				}
+			}
+			else if(prevListens && !perm.listens())
+			{
+				for(RemoteClient& rclt : _clients)
+				{
+					if(_permissions(rclt, group).writes())
+					{
+						rclt.send("/session/permission/update",
+								  getId(),
+								  client.getId(),
+								  group.getId(),
+								  cat,
+								  enablement);
+					}
+				}
+			}
+
+			if(!prevWrites && perm.writes())
+			{
+				for(RemoteClient& rclt : _clients)
+				{
+					if(_permissions(rclt, group).listens())
+					{
+						client.initConnectionTo(rclt);
+						client.send("/session/permission/update",
+									getId(),
+									rclt.getId(),
+									group.getId(),
+									cat,
+									enablement);
+
+					}
+				}
+			}
+			else if(prevWrites && !perm.writes())
+			{
+				// Celui-là peut être fait en local.
+			}
+
+
+		}
+
+		virtual Client& getClient() override
+		{
+			return *_localMaster;
+		}
+
+		LocalMaster& getLocalMaster()
 		{
 			return *_localMaster;
 		}
@@ -69,8 +179,7 @@ class MasterSession : public Session
 
 			// Send isReady
 			client.send("/session/isReady",
-						(osc::int32) getId(),
-						true);
+						(osc::int32) getId());
 
 			// Send information to others clients only when required.
 			// (i. e. when acquiring write permission on a group)
@@ -114,5 +223,5 @@ class MasterSession : public Session
 		// Mute & unmute
 		// Permettre de tout voir ?
 	private:
-		std::unique_ptr<LocalMaster> _localMaster;
+		std::unique_ptr<LocalMaster> _localMaster{nullptr};
 };

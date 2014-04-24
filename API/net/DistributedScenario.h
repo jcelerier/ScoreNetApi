@@ -69,6 +69,6 @@ class DistributedScenario : public Scenario
 		Group* _group = nullptr;
 		bool isLocked = false;
 
-		std::unique_ptr<Scenario> _scenario;
+		std::unique_ptr<Scenario> _scenario{nullptr};
 };
 

@@ -4,19 +4,10 @@
 
 class ClientManager : public Iterable<RemoteClient>
 {
-		using SignalHandler = std::function<void()>;
 	private:
 		unsigned int _lastId = 0;
-		Client::ClientSignalHandler clientChanged; //Même handler pour tous les groupes
-		SignalHandler changed;
 
 	public:
-		ClientManager(Client::ClientSignalHandler onClientChange, SignalHandler onChange):
-			clientChanged(onClientChange),
-			changed(onChange)
-		{
-		}
-
 		RemoteClient& createConnection(std::string hostname,
 									   const std::string& ip,
 									   const int port)
@@ -25,8 +16,7 @@ class ClientManager : public Iterable<RemoteClient>
 			return create(++_lastId,
 						  hostname,
 						  ip,
-						  port,
-						  clientChanged);
+						  port);
 		}
 
 		RemoteClient& createConnection(std::string hostname,
@@ -35,7 +25,6 @@ class ClientManager : public Iterable<RemoteClient>
 			performUniquenessCheck(hostname);
 			return create(++_lastId,
 						  hostname,
-						  std::move(sender),
-						  clientChanged);
+						  std::move(sender));
 		}
 };

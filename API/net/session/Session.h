@@ -4,6 +4,9 @@
 #include "../group/GroupManager.h"
 #include "../client/ClientManager.h"
 #include "../client/RemoteMaster.h"
+
+#include <type_traits>
+
 #include <vector>
 #include <utility>
 
@@ -30,19 +33,19 @@ class Session : public hasName, public hasId
 		friend class ClientSessionBuilder;
 	public:
 		Session(std::string name):
+			Session(name, generateRandom64())
+		{
+		}
+
+		Session(std::string name, int id):
 			hasName(name),
-			hasId(generateRandom64()),
-			_groups(std::bind(&Session::groupChanged, this, std::placeholders::_1),
-					std::bind(&Session::groupManagerChanged, this)),
-			_permissions(std::bind(&Session::permissionChanged, this, std::placeholders::_1),
-						 std::bind(&Session::permissionManagerChanged, this)),
-			_clients(std::bind(&Session::clientChanged, this, std::placeholders::_1),
-					 std::bind(&Session::clientManagerChanged, this))
+			hasId(id)
 		{
 		}
 
 		Session(Session&&) = default;
 		Session(const Session&) = default;
+		virtual ~Session() = default;
 
 		template<typename... K>
 		Group& group(K&&... args)
@@ -66,10 +69,21 @@ class Session : public hasName, public hasId
 			return _clients;
 		}
 
-		template<typename... K>
-		void changePermission(K&&... args)
+		void changePermission(Client& client,
+							  Group& group,
+							  Permission::Category cat,
+							  Permission::Enablement enablement)
 		{
-			_permissions.changePermission(std::forward<K>(args)...);
+			auto& perm = _permissions(client, group);
+			perm.setPermission(cat, enablement);
+
+			// /session/permission/update cat enablement
+			_remoteMaster->send("/session/permission/update",
+								getId(),
+								client.getId(),
+								group.getId(),
+								static_cast<std::underlying_type<Permission::Category>::type>(cat),
+								static_cast<std::underlying_type<Permission::Enablement>::type>(enablement));
 		}
 
 		template<typename... K>
@@ -78,51 +92,14 @@ class Session : public hasName, public hasId
 			return _permissions.getPermission(std::forward<K>(args)...);
 		}
 
-		virtual Client& getLocalClient() = 0;
+		virtual Client& getClient() = 0;
 
 	protected:
-		std::unique_ptr<RemoteMaster> _remoteMaster;
+		std::unique_ptr<RemoteMaster> _remoteMaster{nullptr};
 
 		GroupManager _groups;
 		PermissionManager _permissions;
 		ClientManager _clients;
-
-		// Mettre à jour tous les Clients qui listen() ce groupe (incohérence lors de sauvegarde?)
-		void groupChanged(Group& ) // Mettre la mise-à-jour des scénarios qui y sont reliés ici ?
-		{
-
-		}
-
-		// Mettre à jour tout le monde
-		void clientChanged(Client& )
-		{
-
-		}
-
-		// Mettre à jour :
-		// - ceux qui lui envoyaient et qui ne lui envoient plus
-		// - ceux qui ne lui envoyaient pas et qui lui envoient
-		void permissionChanged(Permission& )
-		{
-			// Envoyer à tout le monde
-		}
-
-		// Mettre à jour les permissions
-		void groupManagerChanged()
-		{
-			// Envoyer à tout le monde
-		}
-
-		void clientManagerChanged()
-		{
-
-		}
-
-		// Mettre à jour tout le monde
-		void permissionManagerChanged()
-		{
-
-		}
 
 	private: // Accessible uniquement à masterSession et ClientSessionBuilder
 		template<typename... K>
@@ -132,7 +109,7 @@ class Session : public hasName, public hasId
 
 			for(Group& group : _groups)
 			{
-				_permissions.createPermission(group, client);
+				_permissions.create(group, client);
 			}
 
 			return client;
@@ -156,9 +133,10 @@ class Session : public hasName, public hasId
 			Group& group = _groups.createGroup(std::forward<K>(args)...);
 			for(RemoteClient& client : _clients)
 			{
-				_permissions.createPermission(group, client);
+				_permissions.create(group, client);
 			}
 
+			_permissions.create(group, getClient());
 			return group;
 		}
 
@@ -171,6 +149,7 @@ class Session : public hasName, public hasId
 				_permissions.remove(group, client);
 			}
 
+			_permissions.remove(group, getClient());
 			_groups.remove(std::forward<K>(args)...);
 		}
 };

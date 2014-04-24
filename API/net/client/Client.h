@@ -10,35 +10,22 @@
 class Client : public hasId, public hasName
 {
 	public:
-		using ClientSignalHandler = std::function<void(Client&)>;
-		using SignalHandler = std::function<void()>;
-
 		using hasName::hasSame;
 		using hasId::hasSame;
 
 		Client(const std::string& hostname):
-			hasId(-1),
-			hasName(hostname),
-			changed{}
+			Client(-1, hostname)
 		{
-
 		}
 
 		Client(const int id,
-			   const std::string& hostname,
-			   ClientSignalHandler changeHandler):
+			   const std::string& hostname):
 			hasId(id),
-			hasName(hostname),
-			changed(std::bind(changeHandler, std::ref(*this)))
+			hasName(hostname)
 		{
 		}
 
-		virtual ~Client()
-		{
-			if(changed)
-				changed();
-		}
-
+		virtual ~Client() = default;
 		Client(Client&&) = default;
 		Client(const Client&) = default;
 		Client& operator=(const Client&) = default;
@@ -48,9 +35,6 @@ class Client : public hasId, public hasName
 		{
 			return c.getId() == getId();
 		}
-
-	protected:
-		SignalHandler changed;
 };
 
 using Client_p = std::unique_ptr<Client>;

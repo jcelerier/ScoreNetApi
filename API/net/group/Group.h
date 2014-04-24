@@ -10,21 +10,14 @@ class Group: public hasName, public hasId
 	public:
 		using hasName::hasSame;
 		using hasId::hasSame;
-		using GroupSignalHandler = std::function<void(Group&)>;
-		using SignalHandler = std::function<void()>;
 
-		Group(std::string name, int id, GroupSignalHandler changeHandler):
+		Group(std::string name, int id):
 			hasName(name),
-			hasId(id),
-			changed(std::bind(changeHandler, std::ref(*this)))
+			hasId(id)
 		{
 		}
 
-		~Group()
-		{
-			if(changed)
-				changed();
-		}
+		~Group() = default;
 
 		Group(Group&&) = default;
 		Group(const Group&) = delete;
@@ -60,8 +53,6 @@ class Group: public hasName, public hasId
 			{
 				return &refSc.get() == &d;
 			}), end(_scenarios));
-
-			changed();
 		}
 
 		void addScenario(const DistributedScenario& d)
@@ -74,11 +65,8 @@ class Group: public hasName, public hasId
 						   }))
 			{
 				_scenarios.emplace_back(d);
-				changed();
 			}
 		}
-
-		SignalHandler changed;
 
 	private:
 		std::vector<std::reference_wrapper<const DistributedScenario> > _scenarios;

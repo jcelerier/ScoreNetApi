@@ -7,18 +7,35 @@ class LocalClient : public Client
 	using SignalHandler = std::function<void()>;
 
 	public:
-		using Client::Client;
+		LocalClient(int port, int id, std::string name):
+			Client(id, name),
+			_receiver(new OscReceiver(port))
+		{
+		}
+
+		LocalClient(std::unique_ptr<OscReceiver>&& receiver, int id, std::string name):
+			Client(id, name),
+			_receiver(std::move(receiver))
+		{
+		}
+
+		virtual ~LocalClient() = default;
 
 		int localPort() const
 		{
-			return _receiver.port();
+			return _receiver->port();
 		}
 
 		void setLocalPort(unsigned int c)
 		{
-			_receiver.setPort(c);
+			_receiver->setPort(c);
+		}
+
+		OscReceiver& receiver()
+		{
+			return *_receiver;
 		}
 
 	protected:
-		OscReceiver _receiver{0};
+		std::unique_ptr<OscReceiver> _receiver{nullptr};
 };

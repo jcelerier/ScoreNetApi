@@ -8,8 +8,7 @@
 #include <vector>
 #include <iostream>
 
-using namespace std;
-int main()
+void someTest()
 {
 	auto sessionList = ClientSessionBuilder::list("localClt");
 	sessionList[0].join();
@@ -46,6 +45,10 @@ int main()
 	s.removeClient("ordi1");
 
 	s.createClient("ordi1", "1.1.1.1", 111);
-
-	return 0;
 }
+
+
+
+// Serveur
+
+

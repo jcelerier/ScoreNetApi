@@ -4,24 +4,20 @@
 
 class RemoteClient : public Client, public RemoteSender
 {
-	using SignalHandler = std::function<void()>;
-
 	public:
 		RemoteClient(const int id,
 					 const std::string& hostname,
 					 const std::string& remoteip,
-					 const int remoteport,
-					 ClientSignalHandler changeHandler):
-			Client(id, hostname, changeHandler),
+					 const int remoteport):
+			Client(id, hostname),
 			RemoteSender(remoteip, remoteport)
 		{
 		}
 
 		RemoteClient(const int id,
 					 const std::string& hostname,
-					 OscSender&& sender,
-					 ClientSignalHandler changeHandler):
-			Client(id, hostname, changeHandler),
+					 OscSender&& sender):
+			Client(id, hostname),
 			RemoteSender(std::move(sender))
 		{
 		}
