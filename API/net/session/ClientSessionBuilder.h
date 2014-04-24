@@ -11,31 +11,31 @@ class ClientSessionBuilder : public hasId, public hasName
 							 std::string masterName,
 							 std::string masterIp,
 							 int masterInputPort,
-							 std::string localName):
+							 std::string localName,
+							 int localPort):
 			hasId(id),
 			hasName(sessionName),
-			_remoteMaster(new RemoteMaster(0,
-										   masterName,
-										   masterIp,
-										   masterInputPort))
+			_session(new ClientSession(localName,
+									   new RemoteMaster(0,
+													   masterName,
+													   masterIp,
+													   masterInputPort),
+									   new LocalClient(std::make_unique<OscReceiver>(localPort),
+													   -1,
+													   localName)))
 		{
-			session._localClient.reset(
-						new LocalClient(std::unique_ptr<OscReceiver>(new OscReceiver(8900)),
-										-1,
-										localName));
-
-			session.getLocalClient().receiver().addHandler("/session/clientNameIsTaken",
+			_session->getLocalClient().receiver().addHandler("/session/clientNameIsTaken",
 								 &ClientSessionBuilder::handle__session_clientNameIsTaken, this);
 
-			session.getLocalClient().receiver().addHandler("/session/setClientId",
+			_session->getLocalClient().receiver().addHandler("/session/setClientId",
 								 &ClientSessionBuilder::handle__session_setClientId, this);
-			session.getLocalClient().receiver().addHandler("/session/update/group",
+			_session->getLocalClient().receiver().addHandler("/session/update/group",
 								 &ClientSessionBuilder::handle__session_update_group, this);
 
-			session.getLocalClient().receiver().addHandler("/session/isReady",
+			_session->getLocalClient().receiver().addHandler("/session/isReady",
 								 &ClientSessionBuilder::handle__session_isReady, this);
 
-			session.getLocalClient().receiver().run();
+			_session->getLocalClient().receiver().run();
 		}
 
 		virtual ~ClientSessionBuilder() = default;
@@ -54,7 +54,7 @@ class ClientSessionBuilder : public hasId, public hasName
 
 			if(idSession == getId())
 			{
-				auto& g = session.private__createGroup(idGroupe, std::string(s));
+				auto& g = _session->private__createGroup(idGroupe, std::string(s));
 				isMute? g.mute() : g.unmute();
 			}
 		}
@@ -78,9 +78,9 @@ class ClientSessionBuilder : public hasId, public hasName
 			args >> idSession >> cname >> osc::EndMessage;
 			std::string name(cname);
 
-			if(idSession == getId() && session.getLocalClient().getName() == name)
+			if(idSession == getId() && _session->getLocalClient().getName() == name)
 			{
-				session.getLocalClient().setName(session.getLocalClient().getName() + "_");
+				_session->getLocalClient().setName(_session->getLocalClient().getName() + "_");
 				join();
 			}
 		}
@@ -94,14 +94,15 @@ class ClientSessionBuilder : public hasId, public hasName
 
 			if(idSession == getId())
 			{
-				session.getLocalClient().setId(idClient);
+				LocalClient& lc = _session->getLocalClient();
+				lc.setId(idClient);
 			}
 		}
 
 
 		/**** Connection ****/
 		// Si on veut, on récupère la liste des sessions dispo sur le réseau
-		static std::vector<ClientSessionBuilder> list(std::string localName)
+		static std::vector<ClientSessionBuilder> list(std::string localName, int localPort)
 		{
 			std::vector<ClientSessionBuilder> v;
 
@@ -110,14 +111,16 @@ class ClientSessionBuilder : public hasId, public hasName
 						   "Machine du compositeur",
 						   "127.0.0.1",
 						   12345,
-						   localName);
+						   localName,
+						   localPort);
 
 			v.emplace_back(21145,
 						   "Session test",
 						   "Machine drôle",
 						   "92.91.90.89",
 						   8908,
-						   localName);
+						   localName,
+						   localPort);
 
 			return v;
 		}
@@ -126,10 +129,10 @@ class ClientSessionBuilder : public hasId, public hasName
 		// 2. On appelle "join" sur celle qu'on désire rejoindre.
 		void join()
 		{
-			_remoteMaster->send("/session/connect" ,
+			_session->_remoteMaster->send("/session/connect" ,
 								getId(),
-								session.getLocalClient().getName().c_str(),
-								_localClientPort);
+								_session->getLocalClient().getName().c_str(),
+								_session->getLocalClient().localPort());
 
 			// Envoyer message de connection au serveur.
 			// Il va construire peu à peu session.
@@ -153,25 +156,19 @@ class ClientSessionBuilder : public hasId, public hasName
 		}
 
 		// 4. A appeler uniquement quand isReady
-		ClientSession&& getBuiltSession()
+		std::unique_ptr<ClientSession>&& getBuiltSession()
 		{
 			if(!_isReady) throw "Is not ready";
 
 			// Construction de l'objet Session.
-			session.setId(getId());
-			session.setName(getName());
+			_session->setId(getId());
+			_session->setName(getName());
 
-			session._remoteMaster = std::move(_remoteMaster);
-
-			return std::move(session);
+			return std::move(_session);
 		}
 
 	private:
-		std::unique_ptr<RemoteMaster> _remoteMaster{nullptr};
-		ClientSession session{""};
-
-		int _localClientPort{8900};
+		std::unique_ptr<ClientSession> _session{nullptr};
 
 		bool _isReady = false;
-		std::unique_ptr<OscReceiver> _receiver{nullptr};
 };

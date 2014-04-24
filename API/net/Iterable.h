@@ -106,7 +106,7 @@ class Iterable
 
 			for(auto& elt : _c)
 			{
-				if(cond(elt))
+				if(cond(*elt))
 				{
 					vect.emplace_back(*elt.get());
 				}
@@ -122,7 +122,7 @@ class Iterable
 
 			for(auto& elt : _c)
 			{
-				if(check(elt.get()))
+				if(check(*elt.get()))
 					return true;
 			}
 

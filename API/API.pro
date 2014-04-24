@@ -45,8 +45,8 @@ HEADERS += \
     net/properties/GenerateUniqueProperty.h \
     net/properties/hasId.h \
     net/session/Session.h \
-    net/permission/Permission.h \
-    net/permission/PermissionManager.h \
+    net/permission/full/Permission.h \
+    net/permission/full/PermissionManager.h \
     net/synchronisation_policy/SynchronisationPolicy.h \
     net/client/Client.h \
     net/client/LocalClient.h \
@@ -59,5 +59,8 @@ HEADERS += \
     net/session/ClientSessionBuilder.h \
     net/client/RemoteSender.h \
     net/client/RemoteMaster.h \
-    net/client/LocalMaster.h
+    net/client/LocalMaster.h \
+    net/permission/view/PermissionView.h \
+    net/permission/PermissionBase.h \
+    net/permission/view/PermissionViewManager.h
 

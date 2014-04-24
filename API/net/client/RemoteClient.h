@@ -32,11 +32,12 @@ class RemoteClient : public Client, public RemoteSender
 		// Le serveur dit au client A (this, qui vient d'être créé)
 		// d'initier la connection avec le client B (c).
 		// Pour cela, on a besoin de l'ip de B par rapport au serveur.
-		void initConnectionTo(RemoteClient& c)
+		void initConnectionTo(int sessionId, RemoteClient& c)
 		{
 			if(c.getId() != getId())
 			{
 				send("/connect/discover",
+					 sessionId,
 					 c.getName().c_str(),
 					 c.getId(),
 					 c.ip().c_str(),

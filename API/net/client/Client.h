@@ -35,6 +35,11 @@ class Client : public hasId, public hasName
 		{
 			return c.getId() == getId();
 		}
+
+		bool operator!=(const Client& c) const
+		{
+			return c.getId() != getId();
+		}
 };
 
 using Client_p = std::unique_ptr<Client>;

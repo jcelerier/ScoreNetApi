@@ -21,12 +21,52 @@ class MasterSession : public Session
 			_localMaster->receiver().addHandler("/session/permission/update",
 												&MasterSession::handle__session_permission_update,
 												this);
+			_localMaster->receiver().addHandler("/session/disconnect",
+												&MasterSession::handle__session_disconnect,
+												this);
 
 			_localMaster->receiver().run();
 		}
 
 		virtual ~MasterSession() = default;
 
+		virtual Client& getClient() override
+		{
+			return *_localMaster;
+		}
+
+		LocalMaster& getLocalMaster()
+		{
+			return *_localMaster;
+		}
+
+		/** Après ceux-là, informer sur réseau **/
+		template<typename... K>
+		Group& createGroup(K&&... args)
+		{
+			return private__createGroup(std::forward<K>(args)...);
+		}
+
+		template<typename... K>
+		void removeGroup(K&&... args)
+		{
+			private__removeGroup(std::forward<K>(args)...);
+		}
+
+
+		template<typename... K>
+		void muteGroup(K&&... args)
+		{
+			groups()(std::forward<K>(args)...).mute();
+		}
+
+		template<typename... K>
+		void unmuteGroup(K&&... args)
+		{
+			groups()(std::forward<K>(args)...).unmute();
+		}
+
+	private:
 		void handle__session_connect(osc::ReceivedMessageArgumentStream args, std::string ip)
 		{
 			osc::int32 idSession, clientListenPort;
@@ -37,14 +77,11 @@ class MasterSession : public Session
 			OscSender clientSender(ip, clientListenPort);
 
 			// Test si bonne session
-			if(idSession != getId()) return;
+			if(idSession != getId()) return; // send message via OSC ?
 
 			// Recherche si nom existe déjà
-			if(std::any_of(begin(_clients), end(_clients),
-						   [&clientName] (RemoteClient& c)
-							{ return c.getName() == clientName;	}))
+			if(clients().has(clientName))
 			{
-
 				clientSender.send(osc::MessageGenerator()("/session/clientNameIsTaken",
 														  getId(),
 														  cname));
@@ -52,6 +89,28 @@ class MasterSession : public Session
 			}
 
 			createClient(clientName, std::move(clientSender));
+		}
+
+		void handle__session_disconnect(osc::ReceivedMessageArgumentStream args)
+		{
+			osc::int32 idSession, idClient;
+			args >> idSession >> idClient;
+
+			if(idSession != getId()) return;
+			if(!clients().has(idClient)) return;
+			auto& clt = client(idClient);
+
+			for(RemoteClient& rclt : clients())
+			{
+				if(clt != rclt)
+				{
+					rclt.send("/session/disconnect",
+							  getId(),
+							  clt.getId());
+				}
+			}
+
+			removeClient(idClient);
 		}
 
 		// /session/permission/update sessionId clientId groupId category enablement
@@ -65,10 +124,10 @@ class MasterSession : public Session
 
 			if(sessionId != getId()) return;
 
-			auto& client = _clients(clientId);
-			auto& group  = _groups(groupId);
-			auto& perm   = _permissions(client,
-										group);
+			//TODO checks
+			RemoteClient& client = this->client(clientId);
+			Group& group = this->group(groupId);
+			Permission& perm = localPermissions()(client, group);
 
 			bool prevListens = perm.listens(),
 				 prevWrites  = perm.writes();
@@ -76,6 +135,8 @@ class MasterSession : public Session
 			perm.setPermission(static_cast<Permission::Category>(cat),
 							   static_cast<Permission::Enablement>(enablement));
 
+			bool postListens = perm.listens(),
+				 postWrites  = perm.writes();
 
 			// Cas de changements :
 			//	- !listens() devient  listens()
@@ -90,72 +151,30 @@ class MasterSession : public Session
 			// Dans tous les cas on informe le maître, c'est lui qui informe les uns et les autres.
 			//
 			// Faire un RemotePermission avec juste listens() et writes()
-			if(!prevListens && perm.listens())
+			for(RemoteClient& rclt : clients())
 			{
-				for(RemoteClient& rclt : _clients)
+				if(rclt == client) continue;
+
+				auto& rclt_perm = localPermissions()(rclt, group);
+				if(rclt_perm.writes() && prevListens != postListens)
 				{
-					if(_permissions(rclt, group).writes())
-					{
-						rclt.initConnectionTo(client);
-						rclt.send("/session/permission/update",
-								  getId(),
-								  client.getId(),
-								  group.getId(),
-								  cat,
-								  enablement);
-					}
+					if(!prevListens && postListens)
+						rclt.initConnectionTo(getId(), client);
+
+					rclt.send("/session/permission/listens",
+							  getId(), client.getId(), group.getId(), postListens);
+				}
+
+				if(rclt_perm.listens() && !prevWrites && postWrites)
+				{
+					client.initConnectionTo(getId(), rclt);
+					client.send("/session/permission/listens",
+								getId(), rclt.getId(), group.getId(), true);
 				}
 			}
-			else if(prevListens && !perm.listens())
-			{
-				for(RemoteClient& rclt : _clients)
-				{
-					if(_permissions(rclt, group).writes())
-					{
-						rclt.send("/session/permission/update",
-								  getId(),
-								  client.getId(),
-								  group.getId(),
-								  cat,
-								  enablement);
-					}
-				}
-			}
-
-			if(!prevWrites && perm.writes())
-			{
-				for(RemoteClient& rclt : _clients)
-				{
-					if(_permissions(rclt, group).listens())
-					{
-						client.initConnectionTo(rclt);
-						client.send("/session/permission/update",
-									getId(),
-									rclt.getId(),
-									group.getId(),
-									cat,
-									enablement);
-
-					}
-				}
-			}
-			else if(prevWrites && !perm.writes())
-			{
-				// Celui-là peut être fait en local.
-			}
-
-
+			// Case write() => !write() is done locally by the concerned client.
 		}
 
-		virtual Client& getClient() override
-		{
-			return *_localMaster;
-		}
-
-		LocalMaster& getLocalMaster()
-		{
-			return *_localMaster;
-		}
 
 		template<typename... K>
 		RemoteClient& createClient(K&&... args)
@@ -168,7 +187,7 @@ class MasterSession : public Session
 						client.getId());
 
 			// Send the groups information.
-			for(auto& group : _groups)
+			for(auto& group : groups())
 			{
 				client.send("/session/update/group",
 							(osc::int32) getId(),
@@ -187,41 +206,45 @@ class MasterSession : public Session
 			return client;
 		}
 
-		/** Après ceux-là, informer sur réseau **/
+		//TODO
 		template<typename... K>
 		void removeClient(K&&... args)
 		{
 			private__removeClient(std::forward<K>(args)...);
 		}
 
-		template<typename... K>
-		Group& createGroup(K&&... args)
+		virtual void createRelatedPermissions(RemoteClient& client)
 		{
-			return private__createGroup(std::forward<K>(args)...);
+			for(Group& group : groups())
+			{
+				localPermissions().create(group, client);
+			}
 		}
 
-		template<typename... K>
-		void removeGroup(K&&... args)
+		virtual void removeRelatedPermissions(RemoteClient &client)
 		{
-			private__removeGroup(std::forward<K>(args)...);
+			for(Group& group : groups())
+			{
+				localPermissions().remove(group, client);
+			}
+		}
+
+		virtual void createRelatedPermissions(Group& group)
+		{
+			for(RemoteClient& client : clients())
+			{
+				localPermissions().create(group, client);
+			}
+		}
+
+		virtual void removeRelatedPermissions(Group& group)
+		{
+			for(RemoteClient& client : clients())
+			{
+				localPermissions().remove(group, client);
+			}
 		}
 
 
-
-		template<typename... K>
-		void muteGroup(K&&... args)
-		{
-			_groups(std::forward<K>(args)...).mute();
-		}
-
-		template<typename... K>
-		void unmuteGroup(K&&... args)
-		{
-			_groups(std::forward<K>(args)...).unmute();
-		}
-
-		// Mute & unmute
-		// Permettre de tout voir ?
-	private:
 		std::unique_ptr<LocalMaster> _localMaster{nullptr};
 };

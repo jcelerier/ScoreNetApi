@@ -11,7 +11,6 @@ class DistributedScenario : public Scenario
 		DistributedScenario(Scenario* sc):
 			_scenario(sc)
 		{
-
 		}
 
 		virtual ~DistributedScenario()
