@@ -12,7 +12,7 @@
 #define TIMENODE_H_
 
 #include <set>
-
+#include <string>
 #include "IObservable.h"
 
 namespace OSSIA {
@@ -24,7 +24,7 @@ class TimeValue;
 class TimeNode : public IObservable {
 
 public:
-
+  TimeNode();
   // Constructors, destructor, assignment
   virtual ~TimeNode() = default;
 
@@ -38,6 +38,7 @@ public:
 
   // Accessors
   TimeValue getDate() const;
+  void setDate(TimeValue);
 
   // pimpl idiom
 private:

@@ -1,10 +1,23 @@
 #include <iostream>
 #include <net/session/ClientSessionBuilder.h>
+#include <mythread.h>
 
 // Client sans Zeroconf
+
+
+
 using namespace std;
 int main()
 {
+	MyThread t;
+	t.start();
+	while(1)
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+	return 0;
+
+	//////////////////////////////////////////////////////
+
 	ClientSessionBuilder sessionBuilder(5678,
 										"Session Maitre",
 										"master",
@@ -26,6 +39,8 @@ int main()
 							 Permission::Enablement::Enabled);
 
 	std::this_thread::sleep_for(std::chrono::seconds(1));
+
+	///////////////////////////////////////////////////////
 
 	ClientSessionBuilder sessionBuilder2(5678,
 										"Session Maitre",

@@ -17,70 +17,73 @@
 
 namespace OSSIA {
 
-class Event;
-class Scenario;
-class State;
-class TimeNode;
-class TimeProcess;
-class TimeValue;
+	class Event;
+	class Scenario;
+	class TimeNode;
+	class TimeProcess;
+	class TimeValue;
 
-class TimeBox : public IObservable {
+	class TimeBox : public IObservable {
 
-public:
+			// pimpl idiom
+		private:
+			class Impl;
+			Impl * pimpl;
 
-  // Constructors, destructor, assignment
-  TimeBox();
-  TimeBox(const TimeBox&);
-  ~TimeBox();
-  TimeBox & operator= (const TimeBox&);
+		public:
+			// Constructors, destructor, assignment
+			TimeBox();
+			TimeBox(const TimeBox&);
+			~TimeBox();
+			TimeBox & operator= (const TimeBox&);
 
-  // Lecture
-  void play(bool log = false, std::string name = "") const;
+			// Lecture
+			void play(bool log = false, std::string name = "") const;
 
-  // Navigation
-  TimeNode & getPreviousNode() const;
-  TimeNode & getNextNode();
-  Event & getStartEvent() const;
-  Event & getEndEvent() const;
-  Scenario & getParentScenario() const;
+			// Navigation
+			TimeNode & getPreviousNode() const;
+			TimeNode & getNextNode();
+			Event & getStartEvent() const;
+			Event & getEndEvent() const;
+			Scenario & getParentScenario() const;
 
-  // Iterators
-  class const_iterator; // bidirectional
-  const_iterator begin() const;
-  const_iterator end() const;
-  const_iterator find(const TimeProcess&) const;
+			void setStartEvent(Event&&);
+			void setEndEvent(Event&&);
 
-  // Managing TimeProcesses
-  void addTimeProcess(const TimeProcess&);
-  bool removeTimeProcess(const TimeProcess&);
+			void setStartEvent(const Event&);
+			void setEndEvent(const Event&);
 
-  // Accessors
-  TimeValue getLength() const;
-  void setLength(TimeValue);
-  TimeValue getMinimumLength() const;
-  void setMinimumLength(TimeValue);
-  TimeValue getMaximumLength() const;
-  void setMaximumLength(TimeValue);
-  bool isRigid();
-  State & getStartState() const;
-  void setStartState(const State&);
-  State & getEndState() const;
-  void setEndState(const State&);
+			// Iterators
+			class const_iterator; // bidirectional
+			const_iterator begin() const;
+			const_iterator end() const;
+			const_iterator find(const TimeProcess&) const;
 
-  // Observation message types
-  enum MessageType {
-    LENGTH,
-    MIN_LENGTH,
-    MAX_LENGTH
-  };
+			// Managing TimeProcesses
+			void addTimeProcess(const TimeProcess&);
+			bool removeTimeProcess(const TimeProcess&);
 
-  // pimpl idiom
-private:
-  class Impl;
-  Impl * pimpl;
+			// Accessors
+			TimeValue getLength() const;
+			void setLength(TimeValue);
+			TimeValue getMinimumLength() const;
+			void setMinimumLength(TimeValue);
+			TimeValue getMaximumLength() const;
+			void setMaximumLength(TimeValue);
+			bool isRigid();
 
-};
+			// Observation message types
+			enum MessageType {
+				LENGTH,
+				MIN_LENGTH,
+				MAX_LENGTH
+			};
+
+
+	};
 
 }
+
+
 
 #endif /* TIMEBOX_H_ */

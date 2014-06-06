@@ -8,6 +8,25 @@ using namespace OSSIA;
 class DistributedScenario : public Scenario
 {
 	public:
+		// Reimplementation of the Scenario interface
+		// Lecture
+		virtual void play() const override
+		{
+			_scenario->play();
+		}
+
+		// Navigation
+		std::set<TimeBox*> getTimeBoxes() const
+		{
+			return _scenario->getTimeBoxes();
+		}
+
+		std::set<TimeNode*> getTimeNodes() const
+		{
+			return _scenario->getTimeNodes();
+		}
+
+		// DistributedScenario starts here
 		DistributedScenario(Scenario* sc):
 			_scenario(sc)
 		{

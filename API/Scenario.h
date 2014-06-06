@@ -17,6 +17,8 @@
 
 namespace OSSIA {
 
+
+class Event;
 class TimeBox;
 class TimeNode;
 
@@ -27,9 +29,8 @@ public:
   // Constructors, destructor, assignment
   Scenario();
   Scenario(const Scenario&);
-  ~Scenario(); // virtual ?
+  ~Scenario();
   Scenario & operator= (const Scenario&);
-  // Penser à faire pour Scenario&& aussi
 
   // Lecture
   virtual void play() const override;
@@ -38,11 +39,23 @@ public:
   std::set<TimeBox*> getTimeBoxes() const;
   std::set<TimeNode*> getTimeNodes() const;
 
+  // Edition
+  void addTimeBox(const TimeBox&, const Event & startEvent);
+  void addTimeBox(
+      const TimeBox&,
+      const Event & startEvent,
+      const Event & endEvent);
+
+  // Accessors
+  Event & getStartEvent() const;
+  void setStartEvent(const Event&);
+  Event & getEndEvent() const;
+  void setEndEvent(const Event&);
+
   // pimpl idiom
 private:
   class Impl;
   Impl * pimpl;
-  //std::unique_ptr ici ?
 
 };
 

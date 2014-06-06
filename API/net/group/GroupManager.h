@@ -12,7 +12,7 @@ class GroupManager : public Iterable<Group>
 	public:
 		Group& createGroup(std::string name)
 		{
-			performUniquenessCheck(std::forward<std::string>(name));
+			performUniquenessCheck(name);
 			auto& g = create(name, _lastId++);
 
 			return g;
@@ -21,7 +21,7 @@ class GroupManager : public Iterable<Group>
 		Group& createGroup(int id, std::string name)
 		{
 			performUniquenessCheck(id);
-			performUniquenessCheck(std::forward<std::string>(name));
+			performUniquenessCheck(name);
 			auto& g = create(name, id);
 
 			_lastId = std::max(_lastId, id);

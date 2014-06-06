@@ -35,6 +35,7 @@ class Group: public hasName, public hasId
 		}
 
 		// Example de fonctionnalité que peut offrir les Groupes ?
+		// TODO Changer en activation de la permission d'exécution avec client local
 		void mute() { _isMuted = true; }
 		void unmute() { _isMuted = false; }
 		bool isMuted() { return _isMuted; }

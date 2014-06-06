@@ -64,8 +64,8 @@ class Iterable
 		template<typename... K>
 		T& create(K&&... args)
 		{
-			elements().emplace_back(new T(std::forward<K>(args)...));
-			return *elements().back().get();
+			_c.emplace_back(new T(std::forward<K>(args)...));
+			return *_c.back().get();
 		}
 
 		template<typename... K>
@@ -131,7 +131,7 @@ class Iterable
 
 
 	private:
-		Container<std::unique_ptr<T>>& elements() { return _c; }
+		//Container<std::unique_ptr<T>>& elements() { return _c; }
 		Container<std::unique_ptr<T>> _c; // Container ex. : std::vector<T>
 };
 

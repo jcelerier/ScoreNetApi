@@ -1,10 +1,10 @@
 TEMPLATE = app
 CONFIG += console warn_on
 CONFIG -= app_bundle
-CONFIG -= qt
+QT += network
 
 QMAKE_CXXFLAGS += -std=c++1y -stdlib=libc++
-QMAKE_LFLAGS += -lc++
+QMAKE_LFLAGS += -lc++ -lpthread
 
 #### Libraries ####
   ##  Oscpack  ##
@@ -17,10 +17,19 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../git/oscpack/build/liboscpack.a
 
 
 #### Source files ####
-SOURCES += main.cpp \
-    Scenario.cpp \
+SOURCES += \ #  main.cpp \
+\ #    Scenario.cpp \
     TimeProcess.cpp \
-    IObservable.cpp
+    IObservable.cpp \
+    naiveImpl/Scenario.cpp \
+    naiveImpl/later.cpp \
+    naiveImpl/Event.cpp \
+    naiveImpl/TimeBox.cpp \
+    naiveImpl/TimeNode.cpp \
+    naiveImpl/TimeValue.cpp \
+    petrinet/PNScenario.cpp \
+    petrinet/PNTimeBox.cpp \
+    petrinet/PNTimeNode.cpp
 
 HEADERS += \
     Event.h \
@@ -35,6 +44,7 @@ HEADERS += \
     StateElement.h \
     TimeBox.h \
     TimeNode.h \
+    TimeValue.h \
     net/DistributedScenario.h \
     net/Iterable.h \
     net/client/ClientManager.h \
@@ -62,5 +72,12 @@ HEADERS += \
     net/client/LocalMaster.h \
     net/permission/view/PermissionView.h \
     net/permission/PermissionBase.h \
-    net/permission/view/PermissionViewManager.h
+    net/permission/view/PermissionViewManager.h \
+    naiveImpl/later.h \
+    petrinet/conversion.h \
+    petrinet/PNScenario.h \
+    petrinet/PNTimeBox.h \
+    petrinet/PNTimeNode.h \
+    net/session/ZeroConfClientSessionBuilder.h \
+    net/session/ZeroConfServer.h
 

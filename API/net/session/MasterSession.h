@@ -67,6 +67,22 @@ class MasterSession : public Session
 		}
 
 	private:
+		void pingAllClients()
+		{
+
+		}
+
+		void send__client_ping(RemoteClient& rclt)
+		{
+			int stamp = std::chrono::milliseconds(std::time(NULL)).count();
+			rclt.send("/client/ping",
+					  getId(),
+					  rclt.getId(),
+					  stamp); // Ajouter timestamp
+
+			rclt.setPingStamp(stamp);
+		}
+
 		void handle__session_connect(osc::ReceivedMessageArgumentStream args, std::string ip)
 		{
 			osc::int32 idSession, clientListenPort;

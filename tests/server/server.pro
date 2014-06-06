@@ -1,10 +1,11 @@
 TEMPLATE = app
 CONFIG += console
-CONFIG -= app_bundle
-CONFIG -= qt
+
+QT += core network
 
 QMAKE_CXXFLAGS += -std=c++1y -stdlib=libc++
 QMAKE_LFLAGS += -lc++ -lpthread
+LIBS += -ldns_sd
 
 INCLUDEPATH += ../../API/
 
@@ -19,5 +20,9 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../git/oscpack/build/liboscpack.
 
 
 #### Source files ####
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    serverthread.cpp
+HEADERS += $$PWD/../../../../../stage/soft/dpetri/src/lib/zeroconf/bonjourserviceregister.h \
+    serverthread.h
+HEADERS += $$PWD/../../../../../stage/NetAPI/ScoreNetApi/API/net/session/ZeroConfServer.h
 

@@ -49,7 +49,13 @@ class RemoteClient : public Client, public RemoteSender
 		void pollDelay();
 		int getDelay();
 
+		void setPingStamp(int ms)
+		{
+			_pingStamp = ms; // Faire struct & vecteur avec seqnum
+		}
+
 	private:
 		int _delayInMs; // ns ? µs?
+		int _pingStamp;
 };
 
