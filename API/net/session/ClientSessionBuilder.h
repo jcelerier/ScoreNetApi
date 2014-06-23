@@ -15,7 +15,7 @@ class ClientSessionBuilder : public hasId, public hasName
 							 int localPort):
 			hasId(id),
 			hasName(sessionName),
-			_session(new ClientSession(localName,
+			_session(new ClientSession(sessionName,
 									   new RemoteMaster(0,
 													   masterName,
 													   masterIp,

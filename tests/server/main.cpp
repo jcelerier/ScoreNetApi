@@ -1,18 +1,16 @@
 #include <iostream>
 #include <net/session/MasterSession.h>
-#include <serverthread.h>
+#include <net/session/ZeroConfServerThread.h>
+#include <QCoreApplication>
 using namespace std;
 
 
-int main()
+int main(int argc, char** argv)
 {
-	MyThread t;
-	t.start();
+	QCoreApplication app(argc, argv);
+	MasterSession zcsession("Session Maitre", 5678);
 
-	while(true)
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-
-	return 0;
+	return app.exec();
 	////////
 
 	MasterSession session("Session Maitre", 5678);

@@ -20,9 +20,8 @@ unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../git/oscpack/build/liboscpack.
 
 
 #### Source files ####
-SOURCES += main.cpp \
-    serverthread.cpp
-HEADERS += $$PWD/../../../../../stage/soft/dpetri/src/lib/zeroconf/bonjourserviceregister.h \
-    serverthread.h
+SOURCES += main.cpp
+HEADERS += $$PWD/../../../../../stage/soft/dpetri/src/lib/zeroconf/bonjourserviceregister.h
 HEADERS += $$PWD/../../../../../stage/NetAPI/ScoreNetApi/API/net/session/ZeroConfServer.h
+HEADERS += $$PWD/../../../../../stage/NetAPI/ScoreNetApi/API/net/session/ZeroConfServerThread.h
 

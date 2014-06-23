@@ -7,16 +7,35 @@
 #include <thread>
 class MyThread : public QThread
 {
-	Q_OBJECT
+		Q_OBJECT
+	public:
+		virtual ~MyThread()
+		{
+			delete _cb;
+		}
 
-protected:
-	void run()
-	{
-		ZeroConfClientSessionBuilder cb;
+	protected:
+		void run()
+		{
+			_cb = new ZeroConfClientSessionBuilder;
+			connect(_cb, &ZeroConfClientSessionBuilder::recordsChanged,
+					this, &MyThread::tryConnect);
 
-		while(1)
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
+			exec();
+		}
+
+	private slots:
+		void tryConnect()
+		{
+			auto lst = _cb->getRecords();
+			if(lst.size() > 0)
+			{
+				_cb->connectTo(lst[0]);
+			}
+		}
+
+	private:
+		ZeroConfClientSessionBuilder* _cb;
 };
 
 #endif // MYTHREAD_H

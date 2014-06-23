@@ -1,20 +1,20 @@
 #include <iostream>
 #include <net/session/ClientSessionBuilder.h>
 #include <mythread.h>
-
+#include <QCoreApplication>
 // Client sans Zeroconf
 
 
 
 using namespace std;
-int main()
+int main(int argc, char** argv)
 {
+	QCoreApplication app(argc, argv);
+
 	MyThread t;
 	t.start();
-	while(1)
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-	return 0;
+	return app.exec();
 
 	//////////////////////////////////////////////////////
 

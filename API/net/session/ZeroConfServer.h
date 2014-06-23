@@ -8,11 +8,30 @@
 class ZeroconfServer : public QObject
 {
 		Q_OBJECT
+
+		int _id;
+		QString _sessionName;
+		QString _machineName;
+		quint16 _receiverPort;
 	public:
+		void setData(int id,
+					 std::string sessionName,
+					 std::string machineName,
+					 int receiverPort)
+		{
+			_id = id;
+			_sessionName = QString::fromStdString(sessionName);
+			_machineName = QString::fromStdString(machineName);
+			_receiverPort = receiverPort;
+			qDebug() << _id << _sessionName << _machineName << _receiverPort;
+		}
+
 		ZeroconfServer():
 			QObject()
 		{
+
 			tcpServer = new QTcpServer(this);
+			bonjourRegister = new BonjourServiceRegister(this);
 
 			if (!tcpServer->listen(QHostAddress::Any, 42591))
 			{
@@ -24,14 +43,14 @@ class ZeroconfServer : public QObject
 			connect(tcpServer, SIGNAL(newConnection()),
 					this,	   SLOT(sendConnectionData()));
 
-			bonjourRegister = new BonjourServiceRegister(this);
-			bonjourRegister->registerService(BonjourRecord(tr("Distributed Petri Net on %1").arg(QHostInfo::localHostName()),
-														   QLatin1String("_dpetriserver._tcp"),
+			bonjourRegister->registerService(BonjourRecord(tr("Distributed Score on %1").arg(QHostInfo::localHostName()),
+														   QLatin1String("_score_net_api._tcp"),
 														   QString()),
 											 tcpServer->serverPort());
 
-			qDebug() << "I am listening on port : " << tcpServer->serverPort();
+			qDebug() << "ZeroConf server listening on port : " << tcpServer->serverPort();
 		}
+
 		virtual ~ZeroconfServer() = default;
 
 	private slots:
@@ -42,9 +61,18 @@ class ZeroconfServer : public QObject
 			QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
 
 			out.setVersion(QDataStream::Qt_5_2);
+			// reserve space to write the size afterwards
 			out << (quint16) 0;
-			out << clientConnection->localAddress()
-				<< (quint16) 6776;
+
+			// write the data
+			qDebug() << _id << _sessionName << _machineName;
+			out << _id
+				<< _sessionName
+				<< _machineName
+				<< clientConnection->localAddress()
+				<< (quint16) _receiverPort;
+
+			// write the size at the beginning
 			out.device()->seek(0);
 			out << (quint16)(block.size() - sizeof(quint16));
 

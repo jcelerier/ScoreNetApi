@@ -79,5 +79,7 @@ HEADERS += \
     petrinet/PNTimeBox.h \
     petrinet/PNTimeNode.h \
     net/session/ZeroConfClientSessionBuilder.h \
-    net/session/ZeroConfServer.h
+    net/session/ZeroConfServer.h \
+    net/session/ZeroConfServerThread.h \
+    petrinet/deplacement.h
 

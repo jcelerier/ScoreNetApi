@@ -1,17 +1,21 @@
 #pragma once
 #include "Session.h"
 #include "../client/LocalMaster.h"
-
+#include "ZeroConfServerThread.h"
 
 // Utiliser templates à la place ?
 class MasterSession : public Session
 {
+		ZeroConfServerThread _zc_thread;
 	public:
 		template<typename... K>
 		MasterSession(K&&... args):
 			Session(std::forward<K>(args)...),
 			_localMaster(new LocalMaster(9000, 0, "master"))
 		{
+			_zc_thread.start();
+			_zc_thread.setData(getId(), getName(), _localMaster->getName(), _localMaster->localPort());
+
 			OscReceiver::connection_handler h = std::bind(&MasterSession::handle__session_connect,
 														  this,
 														  std::placeholders::_1,
