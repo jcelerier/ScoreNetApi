@@ -9,14 +9,19 @@
 #include <QString>
 #include <iostream>
 
+struct ConnectionData
+{
+		std::string ip;
+		int port;
+};
 
-class ZeroConfClientSessionBuilder: public QObject
+class ZeroConfClientThread;
+class ZeroConfClient: public QObject
 {
 		Q_OBJECT
-
+	friend class ZeroConfClientThread;
 	public:
-		virtual ~ZeroConfClientSessionBuilder() = default;
-		ZeroConfClientSessionBuilder():
+		ZeroConfClient():
 			QObject()
 		{
 			// Chargé de recevoir les messages ensuite
@@ -33,6 +38,13 @@ class ZeroConfClientSessionBuilder: public QObject
 					this, SLOT(updateRecords(const QList<BonjourRecord> &)));
 
 			bonjourBrowser->browseForServiceType(QLatin1String("_score_net_api._tcp"));
+		}
+
+		virtual ~ZeroConfClient()
+		{
+			delete tcpSocket;
+			delete bonjourBrowser;
+			delete bonjourResolver;
 		}
 
 		void connectTo(const BonjourRecord& record)
@@ -64,7 +76,9 @@ class ZeroConfClientSessionBuilder: public QObject
 		void updateRecords(const QList<BonjourRecord> &list)
 		{
 			_currentRecords = list;
-			emit recordsChanged();
+			_connectData.clear();
+			for(BonjourRecord record : list)
+				connectTo(record);
 		}
 
 		void readConnectionData()
@@ -83,15 +97,11 @@ class ZeroConfClientSessionBuilder: public QObject
 			if (tcpSocket->bytesAvailable() < blockSize)
 				return;
 
-			int id;
-			QString sName;
-			QString mName;
 			quint16 port;
 			QHostAddress ip;
 
-			in >> id >> sName >> mName >> ip >> port;
-
-			qDebug() << id << sName << mName << ip << port;
+			in >> ip >> port;
+			_connectData.push_back({ip.toString().toStdString().c_str(), port});
 		}
 
 		void displayError(QAbstractSocket::SocketError socketError)
@@ -110,12 +120,12 @@ class ZeroConfClientSessionBuilder: public QObject
 					qDebug() << tcpSocket->errorString();
 			}
 		}
+
 		void connectToServer(const QHostInfo &hostInfo, int port)
 		{
 			const QList<QHostAddress> &addresses = hostInfo.addresses();
 			if (!addresses.isEmpty())
 			{
-				qDebug() << addresses.first() << port;
 				tcpSocket->connectToHost(addresses.first(), port);
 			}
 		}
@@ -127,4 +137,6 @@ class ZeroConfClientSessionBuilder: public QObject
 		BonjourServiceResolver *bonjourResolver = nullptr;
 
 		QList<BonjourRecord> _currentRecords{};
+
+		std::vector<ConnectionData> _connectData;
 };

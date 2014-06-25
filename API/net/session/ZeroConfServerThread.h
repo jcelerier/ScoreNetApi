@@ -12,10 +12,10 @@ class ZeroConfServerThread : public QThread
 		ZeroconfServer* _serv{};
 		bool built{false};
 	public:
-		FORWARD_DECL(void setData)
+		FORWARD_DECL(void setPort)
 		{
 			while(!built) QThread::sleep(1);
-			_serv->setData(FORWARD);
+			_serv->setPort(FORWARD);
 		}
 
 	protected:

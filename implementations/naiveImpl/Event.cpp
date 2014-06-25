@@ -1,6 +1,6 @@
-#include "../Event.h"
-#include "../TimeBox.h"
-#include "../TimeValue.h"
+#include <Event.h>
+#include <TimeBox.h>
+#include <TimeValue.h>
 #include <vector>
 #include <algorithm>
 #include "later.h"

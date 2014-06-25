@@ -9,27 +9,16 @@ class ZeroconfServer : public QObject
 {
 		Q_OBJECT
 
-		int _id;
-		QString _sessionName;
-		QString _machineName;
 		quint16 _receiverPort;
 	public:
-		void setData(int id,
-					 std::string sessionName,
-					 std::string machineName,
-					 int receiverPort)
+		void setPort(int receiverPort)
 		{
-			_id = id;
-			_sessionName = QString::fromStdString(sessionName);
-			_machineName = QString::fromStdString(machineName);
 			_receiverPort = receiverPort;
-			qDebug() << _id << _sessionName << _machineName << _receiverPort;
 		}
 
 		ZeroconfServer():
 			QObject()
 		{
-
 			tcpServer = new QTcpServer(this);
 			bonjourRegister = new BonjourServiceRegister(this);
 
@@ -65,11 +54,7 @@ class ZeroconfServer : public QObject
 			out << (quint16) 0;
 
 			// write the data
-			qDebug() << _id << _sessionName << _machineName;
-			out << _id
-				<< _sessionName
-				<< _machineName
-				<< clientConnection->localAddress()
+			out << clientConnection->localAddress()
 				<< (quint16) _receiverPort;
 
 			// write the size at the beginning
@@ -81,8 +66,6 @@ class ZeroconfServer : public QObject
 
 			clientConnection->write(block);
 			clientConnection->disconnectFromHost();
-
-			qDebug() << "Data sent";
 		}
 
 	private:

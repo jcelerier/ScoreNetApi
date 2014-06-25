@@ -1,4 +1,4 @@
-#include "../TimeValue.h"
+#include <TimeValue.h>
 using namespace OSSIA;
 
 TimeValue::TimeValue()

@@ -14,7 +14,7 @@ class MasterSession : public Session
 			_localMaster(new LocalMaster(9000, 0, "master"))
 		{
 			_zc_thread.start();
-			_zc_thread.setData(getId(), getName(), _localMaster->getName(), _localMaster->localPort());
+			_zc_thread.setPort(_localMaster->localPort());
 
 			OscReceiver::connection_handler h = std::bind(&MasterSession::handle__session_connect,
 														  this,
@@ -89,15 +89,12 @@ class MasterSession : public Session
 
 		void handle__session_connect(osc::ReceivedMessageArgumentStream args, std::string ip)
 		{
-			osc::int32 idSession, clientListenPort;
+			osc::int32 clientListenPort;
 			const char* cname;
 
-			args >> idSession >> cname >> clientListenPort >> osc::EndMessage;
+			args >> cname >> clientListenPort >> osc::EndMessage;
 			std::string clientName(cname);
 			OscSender clientSender(ip, clientListenPort);
-
-			// Test si bonne session
-			if(idSession != getId()) return; // send message via OSC ?
 
 			// Recherche si nom existe déjà
 			if(clients().has(clientName))
@@ -193,6 +190,8 @@ class MasterSession : public Session
 				}
 			}
 			// Case write() => !write() is done locally by the concerned client.
+
+			//TODO Dump the group data if !listens() -> listens().
 		}
 
 
@@ -200,6 +199,11 @@ class MasterSession : public Session
 		RemoteClient& createClient(K&&... args)
 		{
 			auto& client = private__createClient(std::forward<K>(args)...);
+
+			// Send the session data
+			client.send("/session/setSessionId", getId());
+			client.send("/session/setSessionName", getId(), getName().c_str());
+			client.send("/session/setMasterName", getId(), _localMaster->getName().c_str());
 
 			// Send the id.
 			client.send("/session/setClientId",

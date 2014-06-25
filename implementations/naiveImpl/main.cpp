@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <iostream>
 #include "../petrinet/conversion.h"
-#include "../../soft/dpetri/src/lib/petrinetserializer.h"
+#include "../../../../soft/dpetri/src/lib/petrinetserializer.h"
 
 int main()
 {

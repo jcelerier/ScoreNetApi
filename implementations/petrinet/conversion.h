@@ -1,9 +1,9 @@
 #pragma once
-#include "../../soft/dpetri/src/lib/simpleNet/simplePetriNet.h"
-#include "../Scenario.h"
-#include "../TimeBox.h"
-#include "../Event.h"
-#include "../TimeValue.h"
+#include "../../../../soft/dpetri/src/lib/simpleNet/simplePetriNet.h"
+#include <Scenario.h>
+#include <TimeBox.h>
+#include <Event.h>
+#include <TimeValue.h>
 #include <utility>
 // Converts a Scenario to a Petri Net.
 using namespace OSSIA;

@@ -1,6 +1,6 @@
-#include "../TimeBox.h"
-#include "../TimeValue.h"
-#include "../Event.h"
+#include <TimeBox.h>
+#include <TimeValue.h>
+#include <Event.h>
 #include <vector>
 using namespace OSSIA;
 

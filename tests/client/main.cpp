@@ -1,23 +1,35 @@
 #include <iostream>
 #include <net/session/ClientSessionBuilder.h>
-#include <mythread.h>
 #include <QCoreApplication>
 // Client sans Zeroconf
 
+class Test
+{
+	public:
+		Test()
+		{
+			auto vec = ClientSessionBuilder::list();
+			std::cerr << vec.size();
 
+			ClientSessionBuilder builder(vec[0].ip, vec[0].port, "JeanMi", 7888);
+			builder.join();
+			sleep(2);
+			auto session = builder.getBuiltSession();
+		}
+};
 
 using namespace std;
 int main(int argc, char** argv)
 {
 	QCoreApplication app(argc, argv);
+	Test t;
+	std::cerr << "Test ok" << std::endl;
 
-	MyThread t;
-	t.start();
-
-	return app.exec();
+	app.quit();
+	return 0;
 
 	//////////////////////////////////////////////////////
-
+/*
 	ClientSessionBuilder sessionBuilder(5678,
 										"Session Maitre",
 										"master",
@@ -67,4 +79,5 @@ int main(int argc, char** argv)
 	std::this_thread::sleep_for(std::chrono::seconds(2));
 
 	return 0;
+*/
 }

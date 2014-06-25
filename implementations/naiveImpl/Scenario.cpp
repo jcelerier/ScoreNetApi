@@ -1,6 +1,6 @@
-#include "../Scenario.h"
-#include "../Event.h"
-#include "../TimeBox.h"
+#include <Scenario.h>
+#include <Event.h>
+#include <TimeBox.h>
 #include <thread>
 #include <list>
 #include <vector>
