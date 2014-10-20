@@ -1,38 +1,24 @@
 #pragma once
-#include <memory>
-#include "../Scenario.h"
-#include "group/Group.h"
-#include "synchronisation_policy/SynchronisationPolicy.h"
+#include <TimeProcess.h>
 
+#include <net/group/Group.h>
+#include <net/synchronisation_policy/SynchronisationPolicy.h>
 using namespace OSSIA;
-class DistributedScenario : public Scenario
+class DistributedProcess : public TimeProcess
 {
 	public:
-		// Reimplementation of the Scenario interface
-		// Lecture
-		virtual void play() const override
+		virtual void play() const
 		{
-			_scenario->play();
 		}
 
-		// Navigation
-		std::set<TimeBox*> getTimeBoxes() const
-		{
-			return _scenario->getTimeBoxes();
-		}
-
-		std::set<TimeNode*> getTimeNodes() const
-		{
-			return _scenario->getTimeNodes();
-		}
-
+		
 		// DistributedScenario starts here
-		DistributedScenario(Scenario* sc):
+		DistributedProcess(TimeProcess* sc):
 			_scenario(sc)
 		{
 		}
 
-		virtual ~DistributedScenario()
+		virtual ~DistributedProcess()
 		{
 			removeFromGroup();
 		}
@@ -58,7 +44,7 @@ class DistributedScenario : public Scenario
 				_group = &g;
 			}
 		}
-
+/*
 		void assignToGroupRecursively(Group& g)
 		{
 			assignToGroup(g);
@@ -72,7 +58,7 @@ class DistributedScenario : public Scenario
 				}
 			}
 		}
-
+*/
 		void lockToGroup()
 		{
 			isLocked = true;
@@ -82,12 +68,16 @@ class DistributedScenario : public Scenario
 		{
 			isLocked = false;
 		}
-
+		
+		
+		
 	private:
 		SynchronisationPolicy_p _sync;
 		Group* _group = nullptr;
 		bool isLocked = false;
 
-		std::unique_ptr<Scenario> _scenario{nullptr};
+		std::unique_ptr<TimeProcess> _scenario{nullptr};
+
 };
+
 

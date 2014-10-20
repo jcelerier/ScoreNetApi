@@ -1,10 +1,11 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <algorithm>
 #include"../properties/hasId.h"
 #include"../properties/hasName.h"
 
-class DistributedScenario;
+class DistributedProcess;
 class Group: public hasName, public hasId
 {
 	public:
@@ -40,37 +41,37 @@ class Group: public hasName, public hasId
 		void unmute() { _isMuted = false; }
 		bool isMuted() { return _isMuted; }
 
-		std::vector<std::reference_wrapper<const DistributedScenario> >& getScenarios()
+		std::vector<std::reference_wrapper<const DistributedProcess> >& getProcesses()
 		{
-			return _scenarios;
+			return _processes;
 		}
 
-		void removeScenario(const DistributedScenario& d)
+		void removeScenario(const DistributedProcess& d)
 		{
-			_scenarios.erase
-					(std::remove_if(begin(_scenarios),
-						   end(_scenarios),
-						   [&d] (std::reference_wrapper<const DistributedScenario> refSc)
+			_processes.erase
+					(std::remove_if(begin(_processes),
+						   end(_processes),
+						   [&d] (std::reference_wrapper<const DistributedProcess> refSc)
 			{
 				return &refSc.get() == &d;
-			}), end(_scenarios));
+			}), end(_processes));
 		}
 
-		void addScenario(const DistributedScenario& d)
+		void addScenario(const DistributedProcess& d)
 		{
-			if(std::none_of(begin(_scenarios),
-							end(_scenarios),
-							[&d] (std::reference_wrapper<const DistributedScenario> refSc)
+			if(std::none_of(begin(_processes),
+							end(_processes),
+							[&d] (std::reference_wrapper<const DistributedProcess> refSc)
 						   {
 							   return &refSc.get() == &d;
 						   }))
 			{
-				_scenarios.emplace_back(d);
+				_processes.emplace_back(d);
 			}
 		}
 
 	private:
-		std::vector<std::reference_wrapper<const DistributedScenario> > _scenarios;
+		std::vector<std::reference_wrapper<const DistributedProcess> > _processes;
 		bool _isMuted;
 		// Couleur ?
 };

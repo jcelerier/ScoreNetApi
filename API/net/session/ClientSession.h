@@ -128,9 +128,9 @@ class ClientSession : public Session
 		{ // nom id ip port
 			osc::int32 sessionId;
 			const char* name;
-			int id;
+			osc::int32 id;
 			const char* ip;
-			int port;
+			osc::int32 port;
 
 			args >> sessionId >> name >> id >> ip >> port >> osc::EndMessage;
 

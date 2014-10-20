@@ -3,7 +3,7 @@
 #include <net/session/ZeroConfServerThread.h>
 #include <QCoreApplication>
 
-#include <net/DistributedScenario.h>
+#include <net/DistributedProcess.h>
 using namespace std;
 
 
@@ -13,10 +13,10 @@ int main(int argc, char** argv)
 
 	MasterSession session("Session Maitre", 5678);
 	auto& ag = session.createGroup("Audio Group");
-	DistributedScenario sAudio(new Scenario);
+	DistributedProcess sAudio(new TimeProcess);
 	sAudio.assignToGroup(ag);
 	auto& vg = session.createGroup("Video Group");
-	DistributedScenario sVideo(new Scenario);
+	DistributedProcess sVideo(new TimeProcess);
 	sVideo.assignToGroup(vg);
 
 	return app.exec();

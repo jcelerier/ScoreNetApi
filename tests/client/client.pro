@@ -3,25 +3,32 @@ CONFIG += console
 CONFIG -= app_bundle
 QT += core network
 
-QMAKE_CXXFLAGS += -std=c++1y -stdlib=libc++
-QMAKE_LFLAGS += -lc++ -lpthread
+QMAKE_CXXFLAGS += -std=c++14
+QMAKE_LFLAGS += -lpthread
+
+#QMAKE_CXX = clang-3.5
+#QMAKE_CXXFLAGS += -std=c++14 -stdlib=libc++
+#QMAKE_LFLAGS += -lc++ -lpthread
 
 INCLUDEPATH += ../../API/
 
 #### Libraries ####
   ##  Oscpack  ##
-unix:!macx: LIBS += -L$$PWD/../../../../../git/oscpack/build/ -loscpack
+LIBS += /home/jcelerier/git/oscpack/build/liboscpack.a
 
-INCLUDEPATH += $$PWD/../../../../../git/oscpack/src
-DEPENDPATH += $$PWD/../../../../../git/oscpack/src
+INCLUDEPATH += /home/jcelerier/git/oscpack/src
+DEPENDPATH += /home/jcelerier/git/oscpack/src
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../../../../../git/oscpack/build/liboscpack.a
+unix:!macx: PRE_TARGETDEPS += /home/jcelerier/git/oscpack/build/liboscpack.a
+
 
 LIBS += -ldns_sd
 
+LIBS += /home/jcelerier/work/OSSIA/ScoreNetApi/implementations/build-naiveImpl-Desktop_Qt_5_3_GCC_64bit-Debug/libnaiveImpl.so
 #### Source files ####
 SOURCES += main.cpp
-HEADERS += $$PWD/../../../../../stage/soft/dpetri/src/lib/zeroconf/bonjourserviceresolver.h
-HEADERS += $$PWD/../../../../../stage/soft/dpetri/src/lib/zeroconf/bonjourservicebrowser.h
-HEADERS += $$PWD/../../../../../stage/NetAPI/ScoreNetApi/API/net/session/ZeroConfClient.h
-HEADERS += $$PWD/../../../../../stage/NetAPI/ScoreNetApi/API/net/session/ZeroConfClientThread.h
+message($$PWD)
+HEADERS +=  /home/jcelerier/work/OSSIA/dpetri/src/lib/zeroconf/bonjourserviceresolver.h
+HEADERS +=  /home/jcelerier/work/OSSIA/dpetri/src/lib/zeroconf/bonjourservicebrowser.h
+HEADERS +=  /home/jcelerier/work/OSSIA/ScoreNetApi/API/net/session/ZeroConfClient.h
+HEADERS +=  /home/jcelerier/work/OSSIA/ScoreNetApi/API/net/session/ZeroConfClientThread.h

@@ -1,8 +1,9 @@
-TEMPLATE = app
+TEMPLATE = lib
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_CXX = clang-3.5
 QMAKE_CXXFLAGS += -std=c++1y -stdlib=libc++
 QMAKE_LFLAGS += -lc++ -lpthread
 

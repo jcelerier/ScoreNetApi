@@ -1,11 +1,12 @@
 #include "later.h"
 #include <cstdio>
 #include <iostream>
-#include "../petrinet/conversion.h"
-#include "../../../../soft/dpetri/src/lib/petrinetserializer.h"
+// #include "../petrinet/conversion.h"
+// #include "../../../../soft/dpetri/src/lib/petrinetserializer.h"
 
 int main()
 {
+	/*
 	Scenario s;
 	TimeBox b1;
 	b1.setStartEvent(s.getStartEvent());
@@ -30,7 +31,7 @@ int main()
 	PetriNetSerializer<SimplePetriNet> serializer(net);
 	auto txt = serializer.toSimpleText();
 	std::cerr << txt;
-
+*/
 
 	//while(!later_test1)
 

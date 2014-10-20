@@ -15,30 +15,30 @@ template <typename T,
 		  class String = std::string>
 class Iterable
 {
-		template <typename friendT,
-				  template <typename> class friendContainer,
-				  class friendString>
-		friend boost::indirect_iterator<typename friendContainer<std::unique_ptr<friendT>>::iterator>
-			begin(Iterable<friendT, friendContainer, friendString>& i);
 
-		template <typename friendT,
-				  template <typename> class friendContainer,
-				  class friendString>
-		friend boost::indirect_iterator<typename friendContainer<std::unique_ptr<friendT>>::iterator>
-			end(Iterable<friendT, friendContainer, friendString>& i);
-
-		template <typename friendT,
-				  template <typename> class friendContainer,
-				  class friendString>
-		friend boost::indirect_iterator<typename friendContainer<std::unique_ptr<friendT>>::iterator>
-			cbegin(const Iterable<friendT, friendContainer, friendString>& i);
-
-		template <typename friendT,
-				  template <typename> class friendContainer,
-				  class friendString>
-		friend boost::indirect_iterator<typename friendContainer<std::unique_ptr<friendT>>::iterator>
-			cend(const Iterable<friendT, friendContainer, friendString>& i);
-
+		friend boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
+			begin(Iterable& i)
+		{
+			return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(begin(i._c));
+		}
+		
+		friend boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
+			end(Iterable& i)
+		{
+			return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(end(i._c));
+		}
+		
+		friend boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
+			cbegin(const Iterable& i)
+		{
+			return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(cbegin(i._c));
+		}
+		
+		friend boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
+			cend(const Iterable& i)
+		{
+			return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(cend(i._c));
+		}
 
 	public:
 		Iterable() = default;
@@ -135,38 +135,3 @@ class Iterable
 		Container<std::unique_ptr<T>> _c; // Container ex. : std::vector<T>
 };
 
-template <typename T,
-		  template <typename> class Container = SimpleVec,
-		  class String = std::string>
-boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
-	begin(Iterable<T, Container, String>& i)
-{
-	return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(begin(i._c));
-}
-
-template <typename T,
-		  template <typename> class Container = SimpleVec,
-		  class String = std::string>
-boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
-	end(Iterable<T, Container, String>& i)
-{
-	return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(end(i._c));
-}
-
-template <typename T,
-		  template <typename> class Container = SimpleVec,
-		  class String = std::string>
-boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
-	cbegin(const Iterable<T, Container, String>& i)
-{
-	return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(cbegin(i._c));
-}
-
-template <typename T,
-		  template <typename> class Container = SimpleVec,
-		  class String = std::string>
-boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>
-	cend(const Iterable<T, Container, String>& i)
-{
-	return boost::indirect_iterator<typename Container<std::unique_ptr<T>>::iterator>(cend(i._c));
-}

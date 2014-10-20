@@ -153,6 +153,8 @@ class ClientSessionBuilder
 		// 2. On appelle "join" sur celle qu'on désire rejoindre.
 		void join()
 		{
+			std::cerr << std::endl <<_session->getLocalClient().getName().c_str() << std::endl;
+			std::cerr << _session->getLocalClient().localPort() << std::endl;
 			_session->_remoteMaster->send("/session/connect",
 								_session->getLocalClient().getName().c_str(),
 								_session->getLocalClient().localPort());

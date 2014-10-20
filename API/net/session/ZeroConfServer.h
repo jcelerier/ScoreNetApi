@@ -2,7 +2,7 @@
 
 #include <QtNetwork>
 #include <QDebug>
-#include "../../../soft/dpetri/src/lib/zeroconf/bonjourserviceregister.h"
+#include "../../dpetri/src/lib/zeroconf/bonjourserviceregister.h"
 #include <QtNetwork/QTcpServer>
 
 class ZeroconfServer : public QObject

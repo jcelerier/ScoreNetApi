@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QTcpSocket>
-#include <../../../soft/dpetri/src/lib/zeroconf/bonjourrecord.h>
-#include <../../../soft/dpetri/src/lib/zeroconf/bonjourservicebrowser.h>
-#include <../../../soft/dpetri/src/lib/zeroconf/bonjourserviceresolver.h>
+#include <../../dpetri/src/lib/zeroconf/bonjourrecord.h>
+#include <../../dpetri/src/lib/zeroconf/bonjourservicebrowser.h>
+#include <../../dpetri/src/lib/zeroconf/bonjourserviceresolver.h>
 #include <QtNetwork>
 #include <QtNetwork/QHostAddress>
 #include <QString>

@@ -15,6 +15,12 @@ class Test
 			builder.join();
 			sleep(2);
 			auto session = builder.getBuiltSession();
+			
+			auto& g = *begin(session->groups());
+			session->changePermission(session->getLocalClient(),
+									 g,
+									 Permission::Category::Write,
+									 Permission::Enablement::Enabled);
 		}
 };
 

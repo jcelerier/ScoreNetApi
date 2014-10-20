@@ -15,6 +15,7 @@ HEADERS += \
     TimeBox.h \
     TimeNode.h \
     TimeValue.h \
+    net/DistributedProcess.h \
     net/DistributedScenario.h \
     net/Iterable.h \
     net/client/ClientManager.h \
